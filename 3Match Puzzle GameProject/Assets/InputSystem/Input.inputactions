@@ -1,0 +1,160 @@
+{
+    "name": "Input",
+    "maps": [
+        {
+            "name": "Control",
+            "id": "210cae25-4a44-42d9-b94f-a6cf11d17ba8",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Value",
+                    "id": "e6ed89a4-7e24-44e6-9a9f-544b9fdf7065",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Drag",
+                    "type": "PassThrough",
+                    "id": "ece50315-1bc2-45ff-8166-4124ca4796f0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b2a0db52-de40-4a15-9e74-15d8ad356abf",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "46045770-28c4-4c5d-aa0f-dba33b5663dd",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drag",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Modifier",
+                    "id": "99a0eb52-c5b2-4f8f-80fb-3eaade255428",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drag",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Binding",
+                    "id": "77a06115-f34d-4e31-83f2-aa3f7b3fa6d3",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drag",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "LoadingUI",
+            "id": "59d713a3-4948-4396-83bd-e718b60f217e",
+            "actions": [
+                {
+                    "name": "GoToNextScene",
+                    "type": "Button",
+                    "id": "dbf02cd4-4aa0-4d00-a6d8-741cacac60f9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a672b649-4dfd-4330-a13a-031868718a16",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GoToNextScene",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UsingSkill",
+            "id": "e34b771f-8d2a-4958-b31a-4d2fa68aa885",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Button",
+                    "id": "948ea062-3b51-487f-a96a-10978f4ae7cb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "21a031f6-669f-415a-99d3-5713c30f9715",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "MainMenuUI",
+            "id": "bfc1577c-a524-4134-8f05-a5e178f942ce",
+            "actions": [
+                {
+                    "name": "MenuUI",
+                    "type": "Button",
+                    "id": "bf15bfbc-fa10-405c-a949-a6a1a9e0b0c7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "64f6d0d8-94a8-4a73-a850-4cbded1af138",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MenuUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
