@@ -190,11 +190,12 @@ public class GameBoard_BottomUI : MonoBehaviour
                         {
                             gameBoard.gameBoard_Blocks[arrayIndex_Low - bombRange + i, arrayIndex_Column - bombRange + j].isDestroyIntended_Low = true;
                             SetScoreNumText(bombScore_EachBlock);
-                            StartCoroutine(gameBoard.DestroyAnd_CheckMatch_AndDestroy_All());
+                            
 
                         } 
                     }
                 }
+                StartCoroutine(gameBoard.DestroyAnd_CheckMatch_AndDestroy_All());
                 gameBoard_TopUI.RemainTime += bombAddTime;
             }
             else if(skillType == CROSS)

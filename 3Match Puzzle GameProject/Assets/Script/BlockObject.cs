@@ -7,13 +7,20 @@ public class BlockObject : MonoBehaviour
 {
     public int blockTypeID;
     public int blockID;
+    public int originIndex_I = -1;
+    public int originIndex_J = -1;
+    public Vector2 destination;
+    public FourDirection previousDirection = FourDirection.None;
+
     public bool isWall = false;
     public bool isDestroyIntended_Low = false;
     public bool isDestroyIntended_Column = false;
     public bool isAnimationEnd = true;
+    //public bool isMoving = false;
     public SpriteRenderer spriteRenderer;
     public Animator anim;
     public GameBoard board;
+    public List<bool> isMoveMore = new List<bool>();
     public List<Vector2> targetPos = new List<Vector2>();
     //public bool isDestroyAnimationPlaying;
 

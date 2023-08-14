@@ -28,7 +28,7 @@ public class GameBoard : MonoBehaviour
     //참고로 상수는 자동으로 static이되서 인스턴스로 호출하지 않는다.
     public const int COLUMN_NUM = 8;
     public const int LOW_NUM_VISIBLE = 7;      //보드의 보이는 부분
-    public const int LOW_NUM_TOTAL = 22;        //보드의 안보이는 부분
+    public const int LOW_NUM_TOTAL = 25;        //보드의 안보이는 부분
     public int total_Block;
 
     Vector2[,] blockPos;        //blockPos[Low, Column]
@@ -52,6 +52,7 @@ public class GameBoard : MonoBehaviour
     public bool isChangeEnd = true;
     bool[,] isNewBlocksMoveEnd = new bool[LOW_NUM_TOTAL, COLUMN_NUM];
     bool[] isLineMoveEnd = new bool[COLUMN_NUM];
+    bool[] isLineMoveIntended = new bool[COLUMN_NUM];
     public bool[,] isDestroyAnimEnd = new bool[LOW_NUM_TOTAL, COLUMN_NUM];
 
     [SerializeField]
@@ -61,14 +62,7 @@ public class GameBoard : MonoBehaviour
     int[] matchingScore = new int[8];
     float addTime = 2.0f;
 
-    enum FourDirection
-    {
-        East = 0,
-        West,
-        South,
-        North,
-        None
-    }
+    
 
     private void Awake()
     {
@@ -86,6 +80,8 @@ public class GameBoard : MonoBehaviour
                 isNewBlocksMoveEnd[i, j] = true;
                 isDestroyAnimEnd[i, j] = true;
                 isLineMoveEnd[j] = true;
+                isLineMoveIntended[j] = false;
+
             }
         }
     }
@@ -560,7 +556,7 @@ public class GameBoard : MonoBehaviour
                 else
                 {
                     doubleCheck_Num++;
-                    if(doubleCheck_Num > 1) //하나 이상 겹치면 중복이라는 뜻이므로 다시 더한값을 빼줌
+                    if(doubleCheck_Num > 1) 
                     {
                         isDoubleCheck = true;
                         //gameBoard_BottomUI.SetScoreNumText(-matchingScore[checkSame_LowLine - 3]);
@@ -617,6 +613,7 @@ public class GameBoard : MonoBehaviour
                     doubleCheck_Num++;
                     if (doubleCheck_Num > 1) //하나 이상 겹치면 중복이라는 뜻이므로 다시 더한값을 빼줌
                     {
+                        isDoubleCheck = true;
                         //gameBoard_BottomUI.SetScoreNumText(-matchingScore[checkSame_ColumnLine - 3]);
                         break;
                     }
@@ -784,34 +781,165 @@ public class GameBoard : MonoBehaviour
     {
         for(int j =0; j < COLUMN_NUM; j++)
         {
-            CheckDestroyAndBlockDown_Line(j);
+            CheckDestroyAndBlockDown_Line_Data(j);
+        }
+
+        for (int i = 0; i < LOW_NUM_TOTAL; i++)
+        {
+            for (int j = 0; j < COLUMN_NUM; j++)
+            {
+                if (gameBoard_Blocks[i, j].targetPos.Count != 0)
+                {
+                    StartCoroutine(CoMoveBlock_Multi(gameBoard_Blocks[i, j].transform, i, j));
+                    //isNewBlocksMoveEnd[i, j] ||
+                    //if (firstIndex_I == LOW_NUM_TOTAL - 1)
+                    //{
+                    //}
+                }
+            }
         }
     }
 
-    private void CheckDestroyAndBlockDown_Line(int columnIndex)
+    private void CheckDestroyAndBlockDown_Line_Data(int columnIndex)
     {
+        bool isNullExist = false;
+
+        //인수로받은 라인의 빈블록 체크
         for (int i = 0; i < LOW_NUM_TOTAL; i++)
         {
             if (gameBoard_Blocks[i, columnIndex] == null)
             {
-                CheckBlockDown_Line(columnIndex);
-                if (columnIndex > 0)
-                {
-                    CheckBlockDown_Line(columnIndex - 1);
-                }
-
-                if (columnIndex < COLUMN_NUM - 1)
-                {
-                    CheckBlockDown_Line(columnIndex + 1);
-                }
+                isNullExist = true;
+                break;
             }      
         }
+        //빈블록이 존재하면 해당 라인과 +-1 라인 다운
+        if(isNullExist)
+        {
+            CheckBlockDown_Line_Data(columnIndex);
+
+            if (columnIndex > 0)
+            {
+                CheckBlockDown_Line_Data(columnIndex - 1);
+            }
+
+            if (columnIndex < COLUMN_NUM - 1)
+            {
+                CheckBlockDown_Line_Data(columnIndex + 1);
+            }
+
+            bool isLineMoveIntendedExist;
+
+            do
+            {
+                //List<int> intendedColumnIndex = new List<int>();
+                isLineMoveIntendedExist = false;
+                for (int j = 0; j < COLUMN_NUM; j++)
+                {
+                    //CheckDestroyAndBlockDown_Line_Data함수가 블록마다 실행되지 않도록 체크하며 움직임이 예정되었다면 다시 양옆에 빈슬롯이없는지 다시 체크
+                    //isLineMoveIntended[]는 빈블록이 없을때까지 함수를 움직이도록 함
+                    if (isLineMoveIntended[j])
+                    {
+                        isLineMoveIntendedExist = true;
+                        isLineMoveIntended[j] = false;
+                        CheckDestroyAndBlockDown_Line_Data(j);
+                        if (j > 0)
+                        {
+                            CheckDestroyAndBlockDown_Line_Data(j - 1);
+                        }
+
+                        if (j < COLUMN_NUM - 1)
+                        {
+                            CheckDestroyAndBlockDown_Line_Data(j + 1);
+                        }
+                        //intendedColumnIndex.Add(j);
+                    }
+                }
+
+            } while (isLineMoveIntendedExist);
+        }
+
     }
 
-    public void CheckBlockDown_Line(int ColumnIndex)
+    private void CheckDestroyAndBlockDown_Line(int columnIndex)
     {
-        if (isLineMoveEnd[ColumnIndex])
+        bool isNullExist = false;
+
+        //인수로받은 라인의 빈블록 체크
+        //for (int i = 0; i < LOW_NUM_TOTAL; i++)
+        //{
+        //    if (gameBoard_Blocks[i, columnIndex] == null)
+        //    {
+        //        isNullExist = true;
+        //        break;
+        //    }
+        //}
+        //빈블록이 존재하면 해당 라인과 +-1 라인 다운
+        //if (isNullExist)
+        //{
+
+            if (columnIndex > 0)
+            {
+                CheckBlockDown_Line_Data(columnIndex - 1);
+            }
+            CheckBlockDown_Line_Data(columnIndex);
+
+            if (columnIndex < COLUMN_NUM - 1)
+            {
+                CheckBlockDown_Line_Data(columnIndex + 1);
+            }
+
+            bool isLineMoveIntendedExist = false;
+
+            do
+            {
+                //List<int> intendedColumnIndex = new List<int>();
+                isLineMoveIntendedExist = false;
+                for (int j = 0; j < COLUMN_NUM; j++)
+                {
+                    //블럭이 움직이기로 예정되었다면 다시 양옆에 빈슬롯이없는지 다시 체크
+                    if (isLineMoveIntended[j])
+                    {
+                        isLineMoveIntendedExist = true;
+                        isLineMoveIntended[j] = false;
+                        if (j > 0)
+                        {
+                            CheckDestroyAndBlockDown_Line_Data(j - 1);
+                        }
+                        CheckDestroyAndBlockDown_Line_Data(j);
+
+                        if (j < COLUMN_NUM - 1)
+                        {
+                            CheckDestroyAndBlockDown_Line_Data(j + 1);
+                        }
+                        //intendedColumnIndex.Add(j);
+                    }
+                }
+
+            } while (isLineMoveIntendedExist);
+        //}
+
+        for(int i = 0; i < LOW_NUM_TOTAL; i++)
         {
+            for(int j = 0; j < COLUMN_NUM; j++)
+            {
+                if (gameBoard_Blocks[i, j].targetPos.Count != 0)
+                {
+                    StartCoroutine(CoMoveBlock_Multi(gameBoard_Blocks[i, j].transform, i, j));
+                    //isNewBlocksMoveEnd[i, j] ||
+                    //if (firstIndex_I == LOW_NUM_TOTAL - 1)
+                    //{
+                    //}
+                }
+            }
+        }
+
+    }
+
+    public void CheckBlockDown_Line_Data(int ColumnIndex)
+    {
+        //if (isLineMoveEnd[ColumnIndex])
+        //{
             for (int i = 0; i < LOW_NUM_TOTAL; i++)
             {
                 int index_I = i;
@@ -819,7 +947,7 @@ public class GameBoard : MonoBehaviour
                 MoveBlockDown_More(index_I, ColumnIndex);
 
             }
-        }
+        //}
         RandomBlockInstantiate_Top(ColumnIndex);
     }
 
@@ -834,9 +962,22 @@ public class GameBoard : MonoBehaviour
             int firstIndex_J = j;
             bool isBlockMoveEnd = false;
             bool isBlockMoved = false;
-            bool isBlockSideMove = false;
+            //bool isBlockSideMove = false;
             bool isWall = true;
-            FourDirection previousMove = FourDirection.None;
+            //FourDirection previousMove = FourDirection.None;
+
+            //originIndex가 초기 값이라면 값 할당
+            if(gameBoard_Blocks[i, j].originIndex_I == -1)
+            {
+                gameBoard_Blocks[i, j].originIndex_I = firstIndex_I;
+                gameBoard_Blocks[i, j].originIndex_J = firstIndex_J;
+            }
+            else//originIndex가 이미 할당되어있다면 firstIndex를 originIndex값으로 변경
+            {
+                firstIndex_I = gameBoard_Blocks[i, j].originIndex_I;
+                firstIndex_J = gameBoard_Blocks[i, j].originIndex_J;
+            }
+
 
             if(!gameBoard_Blocks[i, j].isWall)
             {
@@ -851,7 +992,6 @@ public class GameBoard : MonoBehaviour
                     while (gameBoard_Blocks[i - 1, j] == null)
                     {
                         MoveBlockDown_OneSlot_Data(i, j);
-                        previousMove = FourDirection.South;
                         isMoved_Down = true;
                         if (i > 1)
                         {
@@ -872,6 +1012,7 @@ public class GameBoard : MonoBehaviour
                     {
                         isBlockMoved = true;
                         gameBoard_Blocks[i, j].targetPos.Add(blockPos[i, j]);
+                        gameBoard_Blocks[i, j].destination = blockPos[i, j];
                     }
                 }
 
@@ -880,30 +1021,30 @@ public class GameBoard : MonoBehaviour
                     if(j > 0 && j < COLUMN_NUM - 1)     //양 끝이 아닌 경우 좌우 빈블록 체크
                     {
                         //대각선 위쪽 방향이 벽이고 벽아래가 비어있다면 그곳으로(옆으로) 이동
-                        if (gameBoard_Blocks[i + 1, j - 1] != null && gameBoard_Blocks[i, j - 1] == null && previousMove != FourDirection.East)
+                        if (gameBoard_Blocks[i + 1, j - 1] != null && gameBoard_Blocks[i, j - 1] == null && gameBoard_Blocks[i, j].previousDirection != FourDirection.East)
                         {
                             if (gameBoard_Blocks[i + 1, j - 1].isWall)
                             {
                                 MoveBlockLeft_OneSlot_Data(i, j);
                                 isBlockMoved = true;
-                                isBlockSideMove = true;
-                                previousMove = FourDirection.West;
+                                //isBlockSideMove = true;
                                 //이 함수안에 MoveBlockDown_More함수가 들어있으므로 재귀형태임
                                 j--;
+                                gameBoard_Blocks[i, j].previousDirection = FourDirection.West;
                                 gameBoard_Blocks[i, j].targetPos.Add(blockPos[i, j]);
                                 continue;
                             }
                         }
 
-                        if (gameBoard_Blocks[i + 1, j + 1] != null && gameBoard_Blocks[i, j + 1] == null && previousMove != FourDirection.West)
+                        if (gameBoard_Blocks[i + 1, j + 1] != null && gameBoard_Blocks[i, j + 1] == null && gameBoard_Blocks[i, j].previousDirection != FourDirection.West)
                         {
                             if (gameBoard_Blocks[i + 1, j + 1].isWall)
                             {
                                 MoveBlockRight_OneSlot_Data(i, j);
                                 isBlockMoved = true;
-                                isBlockSideMove = true;
-                                previousMove = FourDirection.East;
+                                //isBlockSideMove = true;
                                 j++;
+                                gameBoard_Blocks[i, j].previousDirection = FourDirection.East;
                                 gameBoard_Blocks[i, j].targetPos.Add(blockPos[i, j]);
                                 continue;
                             }
@@ -911,15 +1052,15 @@ public class GameBoard : MonoBehaviour
                     }
                     else if (j == 0)    //왼쪽 끝일 때 오른쪽 빈블록만 체크
                     {
-                        if (gameBoard_Blocks[i + 1, j + 1] != null && gameBoard_Blocks[i, j + 1] == null && previousMove != FourDirection.West)
+                        if (gameBoard_Blocks[i + 1, j + 1] != null && gameBoard_Blocks[i, j + 1] == null && gameBoard_Blocks[i, j].previousDirection != FourDirection.West)
                         {
                             if (gameBoard_Blocks[i + 1, j + 1].isWall)
                             {
                                 MoveBlockRight_OneSlot_Data(i, j);
                                 isBlockMoved = true;
-                                isBlockSideMove = true;
-                                previousMove = FourDirection.East;
+                                //isBlockSideMove = true;
                                 j++;
+                                gameBoard_Blocks[i, j].previousDirection = FourDirection.East;
                                 gameBoard_Blocks[i, j].targetPos.Add(blockPos[i, j]);
                                 continue;
                             }
@@ -929,16 +1070,16 @@ public class GameBoard : MonoBehaviour
                     else if (j == COLUMN_NUM -1)    //오른쪽 끝일 때 왼쪽 빈블록만 체크
                     {
                         //대각선 위쪽 방향이 벽이고 벽아래가 비어있다면 그곳으로(옆으로) 이동
-                        if (gameBoard_Blocks[i + 1, j - 1] != null && gameBoard_Blocks[i, j - 1] == null && previousMove != FourDirection.East)
+                        if (gameBoard_Blocks[i + 1, j - 1] != null && gameBoard_Blocks[i, j - 1] == null && gameBoard_Blocks[i, j].previousDirection != FourDirection.East)
                         {
                             if (gameBoard_Blocks[i + 1, j - 1].isWall)
                             {
                                 MoveBlockLeft_OneSlot_Data(i, j);
                                 isBlockMoved = true;
-                                isBlockSideMove = true;
-                                previousMove = FourDirection.West;
+                                //isBlockSideMove = true;
                                 //이 함수안에 MoveBlockDown_More함수가 들어있으므로 재귀형태임
                                 j--;
+                                gameBoard_Blocks[i, j].previousDirection = FourDirection.West;
                                 gameBoard_Blocks[i, j].targetPos.Add(blockPos[i, j]);
                                 continue;
                             }
@@ -950,27 +1091,25 @@ public class GameBoard : MonoBehaviour
 
             if (isBlockMoved)
             {
-                isLineMoveEnd[firstIndex_J] = false;
+                isLineMoveIntended[j] = true;
+                //isLineMoveEnd[firstIndex_J] = false;
             }
             else
             {
-                isLineMoveEnd[firstIndex_J] = true;
+                //isLineMoveEnd[firstIndex_J] = true;
             }
 
-            if (isBlockMoved)
-            {
-                CheckDestroyAndBlockDown_Line(firstIndex_J);
-            }
 
             //
             //최종적으로 위치가 결정되었을 때 블럭 이동
-            if (gameBoard_Blocks[i, j].targetPos.Count != 0 )
-            {
-                if(isNewBlocksMoveEnd[firstIndex_I, firstIndex_J] || firstIndex_I == LOW_NUM_TOTAL - 1)
-                {
-                    StartCoroutine(CoMoveBlock_Multi(gameBoard_Blocks[i, j].transform, firstIndex_I, firstIndex_J, gameBoard_Blocks[i, j].targetPos));
-                }
-            }
+            //if (gameBoard_Blocks[i, j].targetPos.Count != 0)
+            //{
+            //    //isNewBlocksMoveEnd[i, j] ||
+            //    if ( firstIndex_I == LOW_NUM_TOTAL - 1)
+            //    {
+            //        StartCoroutine(CoMoveBlock_Multi(gameBoard_Blocks[i, j].transform, i, j));
+            //    }
+            //}
 
         }
     }
@@ -1034,73 +1173,84 @@ public class GameBoard : MonoBehaviour
     }
 
     //블럭을 한칸 내리며 게임보드에도 세팅
-    private void MoveBlockDown_OneSlot(int i, int j)
-    {
-        if (i > 0)
-        {
-            GameObject moveObj_1;
+    //private void MoveBlockDown_OneSlot(int i, int j)
+    //{
+    //    if (i > 0)
+    //    {
+    //        GameObject moveObj_1;
 
-            moveObj_1 = gameBoard_Blocks[i, j].gameObject;
+    //        moveObj_1 = gameBoard_Blocks[i, j].gameObject;
 
-            StartCoroutine(CoMoveBlock(moveObj_1.transform, i - 1, j));
+    //        StartCoroutine(CoMoveBlock(moveObj_1.transform, i - 1, j));
 
-            gameBoard_Blocks[i, j] = null;
-            gameBoard_Blocks[i - 1, j] = moveObj_1.GetComponent<BlockObject>();
+    //        gameBoard_Blocks[i, j] = null;
+    //        gameBoard_Blocks[i - 1, j] = moveObj_1.GetComponent<BlockObject>();
 
-            gameBoard_Blocks[i - 1, j].blockID = gameBoard_Id[i - 1, j];
-        }
-    }
+    //        gameBoard_Blocks[i - 1, j].blockID = gameBoard_Id[i - 1, j];
+    //    }
+    //}
 
     //방향 상관없이 블럭 트랜스폼을 이동
-    IEnumerator CoMoveBlock(Transform moveTransform, int index_I, int index_J)
-    {
-        isNewBlocksMoveEnd[index_I, index_J] = false;
-        Vector2 targetPos = blockPos[index_I, index_J];
-        Vector2 initiate_Position = (Vector2)moveTransform.position;
+    //IEnumerator CoMoveBlock(Transform moveTransform, int index_I, int index_J)
+    //{
+    //    isNewBlocksMoveEnd[index_I, index_J] = false;
+    //    Vector2 targetPos = blockPos[index_I, index_J];
+    //    Vector2 initiate_Position = (Vector2)moveTransform.position;
 
-        float previousPos_Sqr = 9999999;
+    //    float previousPos_Sqr = 9999999;
 
-        while (!isNewBlocksMoveEnd[index_I, index_J])
-        {
-            yield return null;
-            //moveTransform.position = Vector2.Lerp(initiate_Position, targetPos, moveSpeed);
+    //    while (!isNewBlocksMoveEnd[index_I, index_J])
+    //    {
+    //        yield return null;
+    //        //moveTransform.position = Vector2.Lerp(initiate_Position, targetPos, moveSpeed);
 
-            //currentRatio = currentRatio + blockMoveSpeed;
-            //float destinationRatio = 0.95f;
-            //Vector2 destinationPos_1 = targetPos - targetPos * destinationRatio;
+    //        //currentRatio = currentRatio + blockMoveSpeed;
+    //        //float destinationRatio = 0.95f;
+    //        //Vector2 destinationPos_1 = targetPos - targetPos * destinationRatio;
 
-            moveTransform.position += blockMoveSpeed * (Vector3)Vector2.down; 
+    //        moveTransform.position += blockMoveSpeed * (Vector3)Vector2.down; 
 
 
-            Vector2 currentPos_1 = targetPos - (Vector2)moveTransform.position;
+    //        Vector2 currentPos_1 = targetPos - (Vector2)moveTransform.position;
 
-            float currentPos_1_Sqr = currentPos_1.sqrMagnitude;
+    //        float currentPos_1_Sqr = currentPos_1.sqrMagnitude;
 
-            if ( currentPos_1_Sqr > previousPos_Sqr)
-            {
-                moveTransform.position = targetPos;
-                isNewBlocksMoveEnd[index_I, index_J] = true;
-                Debug.Log("완료");
-            }
-            else
-            {
-                previousPos_Sqr = currentPos_1_Sqr;
-            }
+    //        if ( currentPos_1_Sqr > previousPos_Sqr)
+    //        {
+    //            moveTransform.position = targetPos;
+    //            isNewBlocksMoveEnd[index_I, index_J] = true;
+    //            Debug.Log("완료");
+    //        }
+    //        else
+    //        {
+    //            previousPos_Sqr = currentPos_1_Sqr;
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
-    IEnumerator CoMoveBlock_Multi(Transform moveTransform,int index_I, int index_J ,List<Vector2> targetPos_Multi)
+    IEnumerator CoMoveBlock_Multi(Transform moveTransform,int index_I, int index_J )
     {
         isNewBlocksMoveEnd[index_I, index_J] = false;
         bool isCurrentMoveEnd;
+        //bool isLoopOut = false;
 
-        while(targetPos_Multi.Count > 0)
+        //int currentOriginIndex_I = gameBoard_Blocks[index_I, index_J].originIndex_I;
+        //int currentOriginIndex_J = gameBoard_Blocks[index_I, index_J].originIndex_J;
+
+
+        while (gameBoard_Blocks[index_I, index_J].targetPos.Count > 0)
         {
             isCurrentMoveEnd = false;
-            Vector2 targetPos = targetPos_Multi[0];
+            Vector2 targetPos = gameBoard_Blocks[index_I, index_J].targetPos[0];
             Vector2 initiate_Position = (Vector2)moveTransform.position;
             Vector2 dir = (targetPos - initiate_Position).normalized;
+
+            //gameBoard_Blocks[index_I, index_J].isMoving = true;
+            //if (gameBoard_Blocks[index_I, index_J].isMoving == false)
+            //{
+
+            //}
 
             float previousPos_Sqr = 9999999;
 
@@ -1113,6 +1263,35 @@ public class GameBoard : MonoBehaviour
                 //float destinationRatio = 0.95f;
                 //Vector2 destinationPos_1 = targetPos - targetPos * destinationRatio;
 
+                //추가로 움직이는 경우가 생길경우 기존에 움직이는 함수는 작동하지 않도록 탈출시키는 함수
+                //if(gameBoard_Blocks[index_I, index_J].isMoveMore.Count == 1)
+                //{
+                //    gameBoard_Blocks[index_I, index_J].isMoveMore.Clear();
+                //    break;
+                //}
+                //else if(gameBoard_Blocks[index_I, index_J].isMoveMore.Count > 1)
+                //{
+                //    gameBoard_Blocks[index_I, index_J].isMoveMore.RemoveAt(0);
+                //    break;
+                //}
+
+
+                //if(gameBoard_Blocks[index_I, index_J] == null)
+                //{
+                //    isLoopOut = true;
+                //    isNewBlocksMoveEnd[index_I, index_J] = true;
+                //    break;
+                //}
+                //else
+                //{
+                //    if (gameBoard_Blocks[index_I, index_J].originIndex_I != currentOriginIndex_I || gameBoard_Blocks[index_I, index_J].originIndex_J != currentOriginIndex_J)
+                //    {
+                //        isLoopOut = true;
+                //        isNewBlocksMoveEnd[index_I, index_J] = true;
+                //        break;
+                //    }
+                //}
+                //isNewBlocksMoveEnd[index_I, index_J] = false;
                 moveTransform.position += blockMoveSpeed * (Vector3)dir;
 
 
@@ -1124,15 +1303,18 @@ public class GameBoard : MonoBehaviour
                 {
                     moveTransform.position = targetPos;
                     isCurrentMoveEnd = true;
-                    if(targetPos_Multi.Count >1)
+                    if (gameBoard_Blocks[index_I, index_J].targetPos.Count > 1)
                     {
-                        targetPos_Multi.RemoveAt(0);
+                        gameBoard_Blocks[index_I, index_J].targetPos.RemoveAt(0);
+                        //isLoopOut = true;
                     }
                     else
                     {
-                        targetPos_Multi.Clear();
+                        gameBoard_Blocks[index_I, index_J].targetPos.Clear();
+                        isNewBlocksMoveEnd[index_I, index_J] = true;
+                        //isLoopOut = true;
                     }
-                    
+
                     Debug.Log("완료");
                 }
                 else
@@ -1142,8 +1324,19 @@ public class GameBoard : MonoBehaviour
 
             }
 
+            //if(isLoopOut)
+            //{
+            //    break;
+            //}
+
         }
-        isNewBlocksMoveEnd[index_I, index_J] = true;
+
+        //if(!isLoopOut)
+        //{
+        //    //gameBoard_Blocks[index_I, index_J].isMoving = false;
+        //    isNewBlocksMoveEnd[index_I, index_J] = true;
+        //}
+
 
         //for (int i = 0; i < targetPos_Multi.Count; i++)
         //{
@@ -1286,4 +1479,13 @@ public class GameBoard : MonoBehaviour
     }
 
 
+}
+
+public enum FourDirection
+{
+    East = 0,
+    West,
+    South,
+    North,
+    None
 }
