@@ -627,6 +627,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1209181274}
     m_Modifications:
+    - target: {fileID: 244107833398595439, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 874164896967154010, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
       propertyPath: m_Name
       value: LoadingUI
@@ -653,6 +657,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2382435375460300016, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391271358933126181, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
+      propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6246882616986746796, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
@@ -737,6 +745,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6246882616986746796, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7334557904226804824, guid: 1b77eee7c46237140bf82926a445eeed, type: 3}
+      propertyPath: m_Navigation.m_Mode
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

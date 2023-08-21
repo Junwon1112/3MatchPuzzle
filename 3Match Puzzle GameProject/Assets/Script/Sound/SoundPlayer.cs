@@ -152,11 +152,11 @@ public class SoundPlayer : MonoBehaviour
 
     public void EffectVolumeChange(float _ChangeVolume)
     {
-        effectCurrentVolume = _ChangeVolume;
+        EffectCurrentVolume = _ChangeVolume;
 
         foreach (SoundObject sound in list_Sound)
         {
-            sound.AudioSource.volume = effectCurrentVolume;
+            sound.AudioSource.volume = EffectCurrentVolume;
         }
 
     }
@@ -274,7 +274,7 @@ public class SoundPlayer : MonoBehaviour
     /// </summary>
     public void PlayBGM(AudioClip clip)
     {
-        PlayBGM(clip, BGM_VOLUME);
+        PlayBGM(clip, BGMCurrentVolume);
     }
 
     public void PlayBGM()

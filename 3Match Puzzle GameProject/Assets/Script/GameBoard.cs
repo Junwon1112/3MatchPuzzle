@@ -109,13 +109,15 @@ public class GameBoard : MonoBehaviour
     {
         SetBlockPos();
         gameBoard_Blocks = new BlockObject[LOW_NUM_TOTAL, COLUMN_NUM];
-        //BlockBatch_All();
-        //StartCoroutine(CheckMatchAndDestroy_All());
-        do
+        BlockBatch_All();
+        StartCoroutine(CheckMatchAndDestroy_All());
+
+        while (!IsBlockCanMatch())
         {
-            BlockBatch_All();
+            DestroyAllBlock_Visible();
+            CheckDestroyAndBlockDown();
             StartCoroutine(CheckMatchAndDestroy_All());
-        } while (!IsBlockCanMatch());
+        } 
     }
     private void OnClick_Start(InputAction.CallbackContext obj)
     {
@@ -226,6 +228,13 @@ public class GameBoard : MonoBehaviour
             }
 
             StartCoroutine(CheckMatchAndDestroy_All());
+
+            while (!IsBlockCanMatch())
+            {
+                DestroyAllBlock_Visible();
+                CheckDestroyAndBlockDown();
+                StartCoroutine(CheckMatchAndDestroy_All());
+            }
         }
         else
         {
@@ -280,6 +289,17 @@ public class GameBoard : MonoBehaviour
             else if(!gameBoard_Blocks[i / COLUMN_NUM, i % COLUMN_NUM].isWall)
             {
                 RandomBlockInstantiate(i / COLUMN_NUM, i % COLUMN_NUM);
+            }
+        }
+    }
+
+    private void DestroyAllBlock_Visible()
+    {
+        for(int i = 0; i < LOW_NUM_VISIBLE; i++)
+        {
+            for(int j = 0; j < COLUMN_NUM; j++)
+            {
+                Destroy(gameBoard_Blocks[i, j].gameObject);
             }
         }
     }
@@ -464,6 +484,8 @@ public class GameBoard : MonoBehaviour
     //보이는 곳만 매칭
     private bool CheckMatchBlock_All()
     {
+        UnCheckDestroyIntended();
+
         bool isMatchBlock_Exist = false;
 
         for(int i = 0; i < LOW_NUM_VISIBLE; i++)
@@ -481,6 +503,8 @@ public class GameBoard : MonoBehaviour
 
     private bool IsChangeBlockMatch_CheckMatch(int i, int j, FourDirection fourDirection)
     {
+        UnCheckDestroyIntended();
+
         bool isMatchBlock_Exist_1 = false;
         bool isMatchBlock_Exist_2 = false;
 
@@ -779,10 +803,39 @@ public class GameBoard : MonoBehaviour
     //--------------------------------------------------블록 하강 관련 메서드
     private void CheckDestroyAndBlockDown()
     {
-        for(int j =0; j < COLUMN_NUM; j++)
+        bool isNullBlockExist = true;
+
+        while(isNullBlockExist)
         {
-            CheckDestroyAndBlockDown_Line_Data(j);
+            for (int j = 0; j < COLUMN_NUM; j++)
+            {
+                CheckDestroyAndBlockDown_Line_Data(j);
+            }
+
+            bool isFlag = false;
+            for (int i = 0; i < LOW_NUM_VISIBLE; i++)
+            {
+                for(int j = 0; j < COLUMN_NUM; j++)
+                {
+                    if (gameBoard_Blocks[i, j] == null)
+                    {
+                        isNullBlockExist = true;
+                        isFlag = true;
+                        break;
+                    }
+                    else
+                    {
+                        isNullBlockExist = false;
+                    }
+                }
+                if (isFlag)
+                {
+                    break;
+                }
+            }
         }
+
+        
 
         for (int i = 0; i < LOW_NUM_TOTAL; i++)
         {
@@ -816,72 +869,11 @@ public class GameBoard : MonoBehaviour
         //빈블록이 존재하면 해당 라인과 +-1 라인 다운
         if(isNullExist)
         {
-            CheckBlockDown_Line_Data(columnIndex);
-
             if (columnIndex > 0)
             {
                 CheckBlockDown_Line_Data(columnIndex - 1);
             }
 
-            if (columnIndex < COLUMN_NUM - 1)
-            {
-                CheckBlockDown_Line_Data(columnIndex + 1);
-            }
-
-            bool isLineMoveIntendedExist;
-
-            do
-            {
-                //List<int> intendedColumnIndex = new List<int>();
-                isLineMoveIntendedExist = false;
-                for (int j = 0; j < COLUMN_NUM; j++)
-                {
-                    //CheckDestroyAndBlockDown_Line_Data함수가 블록마다 실행되지 않도록 체크하며 움직임이 예정되었다면 다시 양옆에 빈슬롯이없는지 다시 체크
-                    //isLineMoveIntended[]는 빈블록이 없을때까지 함수를 움직이도록 함
-                    if (isLineMoveIntended[j])
-                    {
-                        isLineMoveIntendedExist = true;
-                        isLineMoveIntended[j] = false;
-                        CheckDestroyAndBlockDown_Line_Data(j);
-                        if (j > 0)
-                        {
-                            CheckDestroyAndBlockDown_Line_Data(j - 1);
-                        }
-
-                        if (j < COLUMN_NUM - 1)
-                        {
-                            CheckDestroyAndBlockDown_Line_Data(j + 1);
-                        }
-                        //intendedColumnIndex.Add(j);
-                    }
-                }
-
-            } while (isLineMoveIntendedExist);
-        }
-
-    }
-
-    private void CheckDestroyAndBlockDown_Line(int columnIndex)
-    {
-        bool isNullExist = false;
-
-        //인수로받은 라인의 빈블록 체크
-        //for (int i = 0; i < LOW_NUM_TOTAL; i++)
-        //{
-        //    if (gameBoard_Blocks[i, columnIndex] == null)
-        //    {
-        //        isNullExist = true;
-        //        break;
-        //    }
-        //}
-        //빈블록이 존재하면 해당 라인과 +-1 라인 다운
-        //if (isNullExist)
-        //{
-
-            if (columnIndex > 0)
-            {
-                CheckBlockDown_Line_Data(columnIndex - 1);
-            }
             CheckBlockDown_Line_Data(columnIndex);
 
             if (columnIndex < COLUMN_NUM - 1)
@@ -889,65 +881,51 @@ public class GameBoard : MonoBehaviour
                 CheckBlockDown_Line_Data(columnIndex + 1);
             }
 
-            bool isLineMoveIntendedExist = false;
+            //bool isLineMoveIntendedExist;
 
-            do
-            {
-                //List<int> intendedColumnIndex = new List<int>();
-                isLineMoveIntendedExist = false;
-                for (int j = 0; j < COLUMN_NUM; j++)
-                {
-                    //블럭이 움직이기로 예정되었다면 다시 양옆에 빈슬롯이없는지 다시 체크
-                    if (isLineMoveIntended[j])
-                    {
-                        isLineMoveIntendedExist = true;
-                        isLineMoveIntended[j] = false;
-                        if (j > 0)
-                        {
-                            CheckDestroyAndBlockDown_Line_Data(j - 1);
-                        }
-                        CheckDestroyAndBlockDown_Line_Data(j);
+            //do
+            //{
+            //    //List<int> intendedColumnIndex = new List<int>();
+            //    isLineMoveIntendedExist = false;
+            //    for (int j = 0; j < COLUMN_NUM; j++)
+            //    {
+            //        //CheckDestroyAndBlockDown_Line_Data함수가 블록마다 실행되지 않도록 체크하며 움직임이 예정되었다면 다시 양옆에 빈슬롯이없는지 다시 체크
+            //        //isLineMoveIntended[]는 빈블록이 없을때까지 함수를 움직이도록 함
+            //        if (isLineMoveIntended[j])
+            //        {
+            //            isLineMoveIntendedExist = true;
+            //            isLineMoveIntended[j] = false;
+            //            if (j > 0)
+            //            {
+            //                CheckDestroyAndBlockDown_Line_Data(j - 1);
+            //            }
 
-                        if (j < COLUMN_NUM - 1)
-                        {
-                            CheckDestroyAndBlockDown_Line_Data(j + 1);
-                        }
-                        //intendedColumnIndex.Add(j);
-                    }
-                }
+            //            CheckDestroyAndBlockDown_Line_Data(j);
 
-            } while (isLineMoveIntendedExist);
-        //}
+            //            if (j < COLUMN_NUM - 1)
+            //            {
+            //                CheckDestroyAndBlockDown_Line_Data(j + 1);
+            //            }
+            //            //intendedColumnIndex.Add(j);
+            //        }
+            //    }
 
-        for(int i = 0; i < LOW_NUM_TOTAL; i++)
-        {
-            for(int j = 0; j < COLUMN_NUM; j++)
-            {
-                if (gameBoard_Blocks[i, j].targetPos.Count != 0)
-                {
-                    StartCoroutine(CoMoveBlock_Multi(gameBoard_Blocks[i, j].transform, i, j));
-                    //isNewBlocksMoveEnd[i, j] ||
-                    //if (firstIndex_I == LOW_NUM_TOTAL - 1)
-                    //{
-                    //}
-                }
-            }
+            //} while (isLineMoveIntendedExist);
         }
 
     }
+
 
     public void CheckBlockDown_Line_Data(int ColumnIndex)
     {
-        //if (isLineMoveEnd[ColumnIndex])
-        //{
-            for (int i = 0; i < LOW_NUM_TOTAL; i++)
-            {
-                int index_I = i;
 
-                MoveBlockDown_More(index_I, ColumnIndex);
+        for (int i = 0; i < LOW_NUM_TOTAL; i++)
+        {
+            int index_I = i;
 
-            }
-        //}
+            MoveBlockDown_More(index_I, ColumnIndex);
+        }
+        
         RandomBlockInstantiate_Top(ColumnIndex);
     }
 
@@ -958,8 +936,8 @@ public class GameBoard : MonoBehaviour
     {
         if(gameBoard_Blocks[i, j] != null)
         {
-            int firstIndex_I = i;
-            int firstIndex_J = j;
+            //int firstIndex_I = i;
+            //int firstIndex_J = j;
             bool isBlockMoveEnd = false;
             bool isBlockMoved = false;
             //bool isBlockSideMove = false;
@@ -967,16 +945,16 @@ public class GameBoard : MonoBehaviour
             //FourDirection previousMove = FourDirection.None;
 
             //originIndex가 초기 값이라면 값 할당
-            if(gameBoard_Blocks[i, j].originIndex_I == -1)
-            {
-                gameBoard_Blocks[i, j].originIndex_I = firstIndex_I;
-                gameBoard_Blocks[i, j].originIndex_J = firstIndex_J;
-            }
-            else//originIndex가 이미 할당되어있다면 firstIndex를 originIndex값으로 변경
-            {
-                firstIndex_I = gameBoard_Blocks[i, j].originIndex_I;
-                firstIndex_J = gameBoard_Blocks[i, j].originIndex_J;
-            }
+            //if(gameBoard_Blocks[i, j].originIndex_I == -1)
+            //{
+            //    gameBoard_Blocks[i, j].originIndex_I = firstIndex_I;
+            //    gameBoard_Blocks[i, j].originIndex_J = firstIndex_J;
+            //}
+            //else//originIndex가 이미 할당되어있다면 firstIndex를 originIndex값으로 변경
+            //{
+            //    firstIndex_I = gameBoard_Blocks[i, j].originIndex_I;
+            //    firstIndex_J = gameBoard_Blocks[i, j].originIndex_J;
+            //}
 
 
             if(!gameBoard_Blocks[i, j].isWall)
@@ -1476,6 +1454,22 @@ public class GameBoard : MonoBehaviour
             
         }
         
+    }
+
+    public void UnCheckDestroyIntended()
+    {
+        for(int i = 0; i < LOW_NUM_VISIBLE; i++)
+        {
+            for(int j = 0; j < COLUMN_NUM; j++)
+            {
+                if (gameBoard_Blocks[i, j] != null)
+                {
+                    gameBoard_Blocks[i, j].isDestroyIntended_Column = false;
+                    gameBoard_Blocks[i, j].isDestroyIntended_Low = false;
+                }
+            }
+        }
+
     }
 
 

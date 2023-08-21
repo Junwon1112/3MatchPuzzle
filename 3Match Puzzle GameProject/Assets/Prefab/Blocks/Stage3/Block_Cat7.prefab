@@ -99,14 +99,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d55a1e308393d5348a1fde028f0b9ee1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockTypeID: 5
+  blockTypeID: 6
   blockID: 0
+  originIndex_I: -1
+  originIndex_J: -1
+  destination: {x: 0, y: 0}
+  previousDirection: 4
   isWall: 0
-  isDestroyIntended: 0
+  isDestroyIntended_Low: 0
+  isDestroyIntended_Column: 0
+  isAnimationEnd: 1
   spriteRenderer: {fileID: 0}
   anim: {fileID: 0}
-  isAnimationEnd: 1
   board: {fileID: 0}
+  isMoveMore: 
+  targetPos: []
 --- !u!61 &6895659090000547331
 BoxCollider2D:
   m_ObjectHideFlags: 0

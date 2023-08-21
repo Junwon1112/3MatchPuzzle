@@ -12,6 +12,7 @@ public class GameOver_UI : MonoBehaviour
     Button retryButton;
     Button backButton;
     CanvasGroup canvasGroup;
+    GameBoard_TopUI gameBoard_TopUI;
 
     public TextMeshProUGUI[] name_Text = new TextMeshProUGUI[3];
     public TextMeshProUGUI[] score_Text = new TextMeshProUGUI[3];
@@ -24,6 +25,7 @@ public class GameOver_UI : MonoBehaviour
         backButton = transform.GetChild(2).GetComponent<Button>();
         canvasGroup = GetComponent<CanvasGroup>();
         gameBoard = FindObjectOfType<GameBoard>();
+        gameBoard_TopUI = FindObjectOfType<GameBoard_TopUI>();
 
         for(int i = 0; i < 3; i++)
         {
@@ -65,6 +67,7 @@ public class GameOver_UI : MonoBehaviour
     public void RetryButton()
     {
         CanvasGroupOnOff();
+        gameBoard_TopUI.isGameOver = false;
         SceneManager.LoadScene(GameManager.instance.currentSceneIndex);
         SoundPlayer.Instance.PlaySound(SoundType_Effect.Effect_UISound);
         SoundPlayer.Instance.UnpauseBGM();
@@ -74,6 +77,7 @@ public class GameOver_UI : MonoBehaviour
     public void BackButton()
     {
         CanvasGroupOnOff();
+        gameBoard_TopUI.isGameOver = false;
         GameManager.instance.currentStage = NOT_STAGE;
         SceneManager.LoadScene("StageSelect");
         SoundPlayer.Instance.PlaySound(SoundType_Effect.Effect_UISound);

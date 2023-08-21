@@ -42,7 +42,8 @@ public class VolumeMenuUI : SideMenuUI
         {
             BGMVolumeControl();
             EffectVolumeControl();
-            yield return new WaitForSecondsRealtime(0.01f);
+            yield return null;
+            //yield return new WaitForSecondsRealtime(0.01f);
         }
 
     }

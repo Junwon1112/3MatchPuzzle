@@ -985,6 +985,22 @@ PrefabInstance:
       value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
+      propertyPath: objs.Array.data[0]
+      value: 
+      objectReference: {fileID: 8197332354717139912, guid: 281f67f3161938b43b2b7710655a0747, type: 3}
+    - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
+      propertyPath: objs.Array.data[1]
+      value: 
+      objectReference: {fileID: 3446899738945562914, guid: a25ed1c7a0b687a41bc02655b3973f88, type: 3}
+    - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
+      propertyPath: objs.Array.data[2]
+      value: 
+      objectReference: {fileID: 7134313493041031576, guid: 7ba221bdf0792534b86803cb2bce8961, type: 3}
+    - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
+      propertyPath: objs.Array.data[3]
+      value: 
+      objectReference: {fileID: 2716968913172965273, guid: 83ed5a84f5062a84ea062c7d868415dd, type: 3}
+    - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
       propertyPath: wallPosId.Array.size
       value: 8
       objectReference: {fileID: 0}

@@ -181,6 +181,7 @@ public class GameBoard_BottomUI : MonoBehaviour
                 uint arrayIndex_Low = (uint)targetBlock.blockID / GameBoard.COLUMN_NUM;
                 uint arrayIndex_Column = (uint)targetBlock.blockID % GameBoard.COLUMN_NUM;
 
+                gameBoard.UnCheckDestroyIntended();
                 for(int i = 0; i < bombRange * 2 + 1; i++)
                 {
                     for (int j = 0; j < bombRange * 2 + 1; j++)
@@ -206,6 +207,8 @@ public class GameBoard_BottomUI : MonoBehaviour
                 BlockObject targetBlock = hit.transform.GetComponent<BlockObject>();
                 uint arrayIndex_Low = (uint)targetBlock.blockID / GameBoard.COLUMN_NUM;
                 uint arrayIndex_Column = (uint)targetBlock.blockID % GameBoard.COLUMN_NUM;
+
+                gameBoard.UnCheckDestroyIntended();
 
                 for (int m = 0; m < GameBoard.COLUMN_NUM; m++)
                 {

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class GameBoard_TopUI : MonoBehaviour
 {
     Slider timer;
+    public bool isGameOver = false;
 
     [SerializeField]
     float limitTime = 60.0f;
@@ -18,18 +19,22 @@ public class GameBoard_TopUI : MonoBehaviour
         get { return remainTime; }
         set 
         {
-            if(value <= limitTime && value >= 0)
+            if(!isGameOver)
             {
-                remainTime = value;
+                if(value <= limitTime && value >= 0)
+                {
+                    remainTime = value;
+                }
+                else if(value > limitTime)
+                {
+                    remainTime = limitTime;
+                }
+                else
+                {
+                    remainTime = 0;
+                }
             }
-            else if(value > limitTime)
-            {
-                remainTime = limitTime;
-            }
-            else
-            {
-                remainTime = 0;
-            }
+            else { remainTime = 0; }
              
         }
     }
@@ -81,6 +86,7 @@ public class GameBoard_TopUI : MonoBehaviour
 
     private void GameOver()
     {
+        isGameOver = true;
         gameBoard_BottomUI.UseSkillEnd();
         gameOver_UI.CanvasGroupOnOff();
 

@@ -986,7 +986,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
       propertyPath: blockMoveSpeed
-      value: 0.07
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 164362898656885481, guid: a2f379023f1e519478a4a7ad9b2987a4, type: 3}
       propertyPath: objs.Array.size
